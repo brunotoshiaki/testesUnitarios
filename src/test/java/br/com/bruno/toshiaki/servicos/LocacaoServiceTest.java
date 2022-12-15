@@ -7,12 +7,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import br.com.bruno.toshiaki.entidades.Filme;
-import br.com.bruno.toshiaki.entidades.Locacao;
 import br.com.bruno.toshiaki.entidades.Usuario;
 import br.com.bruno.toshiaki.exceptions.FilmeSemEstoqueException;
 import br.com.bruno.toshiaki.exceptions.LocadoraException;
 import br.com.bruno.toshiaki.servico.LocacaoService;
 import java.util.Date;
+import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -36,11 +36,11 @@ public class LocacaoServiceTest {
   @Test
   public void testeLocacao() throws Exception {
     //cenario
-    Usuario usuario = new Usuario("Usuario 1");
-    Filme filme = new Filme("Filme 1", 1, 5.0);
+    var usuario = new Usuario("Usuario 1");
+    var filmes = List.of(new Filme("Filme 1", 1, 5.0));
 
     //acao
-    Locacao locacao = service.alugarFilme(usuario, filme);
+    var locacao = service.alugarFilme(usuario, filmes);
 
     //verificacao
     error.checkThat(locacao.getValor(), is(equalTo(5.0)));
@@ -51,33 +51,31 @@ public class LocacaoServiceTest {
   @Test(expected = FilmeSemEstoqueException.class)
   public void testLocacao_filmeSemEstoque() throws Exception {
     //cenario
-    Usuario usuario = new Usuario("Usuario 1");
-    Filme filme = new Filme("Filme 2", 0, 4.0);
+    var usuario = new Usuario("Usuario 1");
+    var filmes = List.of(new Filme("Filme 1", 0, 4.0));
 
     //acao
-    service.alugarFilme(usuario, filme);
+    service.alugarFilme(usuario, filmes);
   }
 
   @Test
   public void testLocacao_usuarioVazio() throws FilmeSemEstoqueException {
     //cenario
-    Filme filme = new Filme("Filme 2", 1, 4.0);
+    var filmes = List.of(new Filme("Filme 1", 1, 5.0));
 
     //acao
     try {
-      service.alugarFilme(null, filme);
+      service.alugarFilme(null, filmes);
       Assert.fail();
     } catch (LocadoraException e) {
       assertThat(e.getMessage(), is("Usuario vazio"));
     }
-
   }
-
 
   @Test
   public void testLocacao_FilmeVazio() throws FilmeSemEstoqueException, LocadoraException {
     //cenario
-    Usuario usuario = new Usuario("Usuario 1");
+    var usuario = new Usuario("Usuario 1");
 
     exception.expect(LocadoraException.class);
     exception.expectMessage("Filme vazio");

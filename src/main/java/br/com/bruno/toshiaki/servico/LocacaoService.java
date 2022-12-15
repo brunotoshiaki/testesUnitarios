@@ -8,38 +8,47 @@ import br.com.bruno.toshiaki.entidades.Usuario;
 import br.com.bruno.toshiaki.exceptions.FilmeSemEstoqueException;
 import br.com.bruno.toshiaki.exceptions.LocadoraException;
 import java.util.Date;
+import java.util.List;
+import org.apache.commons.collections4.CollectionUtils;
 
 public class LocacaoService {
 
-	public Locacao alugarFilme(Usuario usuario, Filme filme) throws FilmeSemEstoqueException, LocadoraException {
-		if(usuario == null) {
-			throw new LocadoraException("Usuario vazio");
-		}
+  public Locacao alugarFilme(Usuario usuario, List<Filme> filmes)
+      throws FilmeSemEstoqueException, LocadoraException {
+    if (usuario == null) {
+      throw new LocadoraException("Usuario vazio");
+    }
 
-		if(filme == null) {
-			throw new LocadoraException("Filme vazio");
-		}
+    if (CollectionUtils.isEmpty(filmes)) {
+      throw new LocadoraException("Filme vazio");
+    }
 
-		if(filme.getEstoque() == 0) {
-			throw new FilmeSemEstoqueException();
-		}
+    for (Filme filme : filmes) {
+      if (filme.getEstoque() == 0) {
+        throw new FilmeSemEstoqueException();
+      }
+    }
 
-		Locacao locacao = new Locacao();
-		locacao.setFilme(filme);
-		locacao.setUsuario(usuario);
-		locacao.setDataLocacao(new Date());
-		locacao.setValor(filme.getPrecoLocacao());
+    var locacao = new Locacao();
+    locacao.setFilmes(filmes);
+    locacao.setUsuario(usuario);
+    locacao.setDataLocacao(new Date());
+    var valorTotal = 0d;
+    for (Filme filme : filmes) {
+      valorTotal += filme.getPrecoLocacao();
+    }
+    locacao.setValor(valorTotal);
 
-		//Entrega no dia seguinte
-		Date dataEntrega = new Date();
-		dataEntrega = adicionarDias(dataEntrega, 1);
-		locacao.setDataRetorno(dataEntrega);
+    //Entrega no dia seguinte
+    var dataEntrega = new Date();
+    dataEntrega = adicionarDias(dataEntrega, 1);
+    locacao.setDataRetorno(dataEntrega);
 
-		//Salvando a locacao...	
-		//TODO adicionar método para salvar
+    //Salvando a locacao...
+    //TODO adicionar método para salvar
 
-		return locacao;
-	}
+    return locacao;
+  }
 
 
 }
