@@ -1,5 +1,8 @@
 package br.com.bruno.toshiaki.servicos;
 
+import static br.com.bruno.toshiaki.builders.FilmeBuilder.umFilme;
+import static br.com.bruno.toshiaki.builders.FilmeBuilder.umFilmeSemEstoque;
+import static br.com.bruno.toshiaki.builders.UsuarioBuilder.umUsuario;
 import static br.com.bruno.toshiaki.matchers.MatchersProprios.caiNumaSegunda;
 import static br.com.bruno.toshiaki.matchers.MatchersProprios.ehHoje;
 import static br.com.bruno.toshiaki.matchers.MatchersProprios.ehHojeComDiferencaDias;
@@ -7,8 +10,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import br.com.bruno.toshiaki.entidades.Filme;
-import br.com.bruno.toshiaki.entidades.Usuario;
 import br.com.bruno.toshiaki.exceptions.FilmeSemEstoqueException;
 import br.com.bruno.toshiaki.exceptions.LocadoraException;
 import br.com.bruno.toshiaki.servico.LocacaoService;
@@ -42,8 +43,8 @@ public class LocacaoServiceTest {
     Assume.assumeFalse(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
 
     //cenario
-    var usuario = new Usuario("Usuario 1");
-    var filmes = List.of(new Filme("Filme 1", 1, 5.0));
+    var usuario = umUsuario().agora();
+    var filmes = List.of(umFilme().comValor(5.0).agora());
 
     //acao
     var locacao = service.alugarFilme(usuario, filmes);
@@ -57,8 +58,8 @@ public class LocacaoServiceTest {
   @Test(expected = FilmeSemEstoqueException.class)
   public void naoDeveAlugarFilmeSemEstoque() throws Exception {
     //cenario
-    var usuario = new Usuario("Usuario 1");
-    var filmes = List.of(new Filme("Filme 1", 0, 4.0));
+    var usuario = umUsuario().agora();
+    var filmes = List.of(umFilmeSemEstoque().agora());
 
     //acao
     service.alugarFilme(usuario, filmes);
@@ -67,7 +68,7 @@ public class LocacaoServiceTest {
   @Test
   public void naoDeveAlugarFilmeSemUsuario() throws FilmeSemEstoqueException {
     //cenario
-    var filmes = List.of(new Filme("Filme 1", 1, 5.0));
+    var filmes = List.of(umFilme().agora());
 
     //acao
     try {
@@ -81,7 +82,7 @@ public class LocacaoServiceTest {
   @Test
   public void naoDeveAlugarFilmeSemFilme() throws FilmeSemEstoqueException, LocadoraException {
     //cenario
-    var usuario = new Usuario("Usuario 1");
+    var usuario = umUsuario().agora();
 
     exception.expect(LocadoraException.class);
     exception.expectMessage("Filme vazio");
@@ -98,8 +99,8 @@ public class LocacaoServiceTest {
     Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
 
     //cenario
-    var usuario = new Usuario("Usuário 1");
-    var filmes = List.of(new Filme("Filme 1", 1, 5.0));
+    var usuario = umUsuario().agora();
+    var filmes = List.of(umFilme().agora());
 
     //acao
     var retorno = service.alugarFilme(usuario, filmes);
