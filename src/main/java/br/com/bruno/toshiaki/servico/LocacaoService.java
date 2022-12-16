@@ -7,6 +7,8 @@ import br.com.bruno.toshiaki.entidades.Locacao;
 import br.com.bruno.toshiaki.entidades.Usuario;
 import br.com.bruno.toshiaki.exceptions.FilmeSemEstoqueException;
 import br.com.bruno.toshiaki.exceptions.LocadoraException;
+import br.com.bruno.toshiaki.utils.DataUtils;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
@@ -34,16 +36,10 @@ public class LocacaoService {
     locacao.setUsuario(usuario);
     locacao.setDataLocacao(new Date());
     var valorTotal = 0d;
+
     for (int i = 0; i < filmes.size(); i++) {
       Filme filme = filmes.get(i);
-      Double valorFilme = switch (i) {
-        case 2 -> filme.getPrecoLocacao() * 0.75;
-        case 3 -> filme.getPrecoLocacao() * 0.5;
-        case 4 -> filme.getPrecoLocacao() * 0.25;
-        case 5 -> 0d;
-        default -> filme.getPrecoLocacao();
-      };
-
+      var valorFilme = getValorFilme(i, filme);
       valorTotal += valorFilme;
     }
     locacao.setValor(valorTotal);
@@ -51,12 +47,27 @@ public class LocacaoService {
     //Entrega no dia seguinte
     var dataEntrega = new Date();
     dataEntrega = adicionarDias(dataEntrega, 1);
+
+    if (DataUtils.verificarDiaSemana(dataEntrega, Calendar.SUNDAY)) {
+      dataEntrega = adicionarDias(dataEntrega, 1);
+    }
+
     locacao.setDataRetorno(dataEntrega);
 
     //Salvando a locacao...
     //TODO adicionar método para salvar
 
     return locacao;
+  }
+
+  private static Double getValorFilme(int i, Filme filme) {
+    return switch (i) {
+      case 2 -> filme.getPrecoLocacao() * 0.75;
+      case 3 -> filme.getPrecoLocacao() * 0.5;
+      case 4 -> filme.getPrecoLocacao() * 0.25;
+      case 5 -> 0d;
+      default -> filme.getPrecoLocacao();
+    };
   }
 
 

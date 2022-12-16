@@ -12,9 +12,12 @@ import br.com.bruno.toshiaki.entidades.Usuario;
 import br.com.bruno.toshiaki.exceptions.FilmeSemEstoqueException;
 import br.com.bruno.toshiaki.exceptions.LocadoraException;
 import br.com.bruno.toshiaki.servico.LocacaoService;
+import br.com.bruno.toshiaki.utils.DataUtils;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,6 +39,8 @@ public class LocacaoServiceTest {
 
   @Test
   public void deveAlugarFilme() throws Exception {
+    Assume.assumeFalse(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
+
     //cenario
     var usuario = new Usuario("Usuario 1");
     var filmes = List.of(new Filme("Filme 1", 1, 5.0));
@@ -147,5 +152,25 @@ public class LocacaoServiceTest {
 
     //verificacao
     assertThat(resultado.getValor(), is(14.0));
+  }
+
+
+  @Test
+  public void deveDevolverSegundaAlugandoSabado()
+      throws FilmeSemEstoqueException, LocadoraException {
+
+    Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
+
+    //cenario
+    var usuario = new Usuario("Usuário 1");
+    var filmes = List.of(new Filme("Filme 1", 1, 5.0));
+
+    //acao
+    var retorno = service.alugarFilme(usuario, filmes);
+
+    //verificacao
+    var ehSegunda = DataUtils.verificarDiaSemana(retorno.getDataRetorno(), Calendar.MONDAY);
+    Assert.assertTrue(ehSegunda);
+
   }
 }
