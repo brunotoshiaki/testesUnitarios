@@ -34,8 +34,17 @@ public class LocacaoService {
     locacao.setUsuario(usuario);
     locacao.setDataLocacao(new Date());
     var valorTotal = 0d;
-    for (Filme filme : filmes) {
-      valorTotal += filme.getPrecoLocacao();
+    for (int i = 0; i < filmes.size(); i++) {
+      Filme filme = filmes.get(i);
+      Double valorFilme = switch (i) {
+        case 2 -> filme.getPrecoLocacao() * 0.75;
+        case 3 -> filme.getPrecoLocacao() * 0.5;
+        case 4 -> filme.getPrecoLocacao() * 0.25;
+        case 5 -> 0d;
+        default -> filme.getPrecoLocacao();
+      };
+
+      valorTotal += valorFilme;
     }
     locacao.setValor(valorTotal);
 

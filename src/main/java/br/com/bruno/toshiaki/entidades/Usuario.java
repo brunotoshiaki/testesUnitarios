@@ -7,6 +7,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class Usuario {
 
+
   private String nome;
 
 }
