@@ -1,5 +1,6 @@
 package br.com.bruno.toshiaki.servicos;
 
+import static br.com.bruno.toshiaki.matchers.MatchersProprios.caiNumaSegunda;
 import static br.com.bruno.toshiaki.utils.DataUtils.isMesmaData;
 import static br.com.bruno.toshiaki.utils.DataUtils.obterDataComDiferencaDias;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -104,8 +105,8 @@ public class LocacaoServiceTest {
     var retorno = service.alugarFilme(usuario, filmes);
 
     //verificacao
-    var ehSegunda = DataUtils.verificarDiaSemana(retorno.getDataRetorno(), Calendar.MONDAY);
-    Assert.assertTrue(ehSegunda);
+
+    assertThat(retorno.getDataRetorno(), caiNumaSegunda());
 
   }
 }
