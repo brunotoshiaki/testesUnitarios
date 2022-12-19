@@ -44,9 +44,6 @@ public class LocacaoService {
     locacao.setDataRetorno(dataEntrega);
   }
 
-  public void setSpcService(SPCService spcService) {
-    this.spcService = spcService;
-  }
 
   private Double getValorTotal(List<Filme> filmes) {
     var valorTotal = 0d;
@@ -94,7 +91,7 @@ public class LocacaoService {
   }
 
   public void notificarAtrasos() {
-  var locacoes = locacaoDao.obterLocacoesPendentes();
+    var locacoes = locacaoDao.obterLocacoesPendentes();
     for (Locacao locacao : locacoes) {
       if (locacao.getDataRetorno().before(new Date())) {
         emailService.notificarAtraso(locacao.getUsuario());
@@ -103,12 +100,4 @@ public class LocacaoService {
   }
 
 
-  public void setLocacaoDao(LocacaoDao locacaoDao) {
-    this.locacaoDao = locacaoDao;
-  }
-
-
-  public void setEmailService(EmailService email) {
-    emailService = email;
-  }
 }

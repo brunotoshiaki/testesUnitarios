@@ -12,7 +12,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -38,6 +37,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import org.junit.rules.ExpectedException;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 public class LocacaoServiceTest {
 
@@ -46,12 +48,14 @@ public class LocacaoServiceTest {
   public ErrorCollector error = new ErrorCollector();
   @Rule
   public ExpectedException exception = ExpectedException.none();
+
+  @InjectMocks
   private LocacaoService service;
-
+  @Mock
   private SPCService spc;
-
+  @Mock
   private LocacaoDao dao;
-
+  @Mock
   private EmailService email;
 
   public LocacaoServiceTest() {
@@ -59,13 +63,7 @@ public class LocacaoServiceTest {
 
   @Before
   public void setup() {
-    this.service = new LocacaoService();
-    this.dao = mock(LocacaoDao.class);
-    this.service.setLocacaoDao(this.dao);
-    this.spc = mock(SPCService.class);
-    this.service.setSpcService(this.spc);
-    this.email = mock(EmailService.class);
-    this.service.setEmailService(this.email);
+    MockitoAnnotations.openMocks(this);
   }
 
   @Test

@@ -11,6 +11,7 @@ import br.com.bruno.toshiaki.entidades.Usuario;
 import br.com.bruno.toshiaki.exceptions.FilmeSemEstoqueException;
 import br.com.bruno.toshiaki.exceptions.LocadoraException;
 import br.com.bruno.toshiaki.servico.LocacaoService;
+import br.com.bruno.toshiaki.servico.SPCService;
 import java.util.Collection;
 import java.util.List;
 import org.junit.Before;
@@ -19,7 +20,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
-import org.mockito.Mockito;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(Parameterized.class)
 public class CalculoValorLocacaoTest {
@@ -37,7 +40,15 @@ public class CalculoValorLocacaoTest {
   public Double valorLocacao;
   @Parameter(value = 2)
   public String cenario;
+  @InjectMocks
   private LocacaoService service;
+
+  @Mock
+  private LocacaoDao dao;
+
+  @Mock
+  private SPCService spc;
+
 
   @Parameters(name = "{2}")
   public static Collection<Object[]> getParametros() {
@@ -54,9 +65,7 @@ public class CalculoValorLocacaoTest {
 
   @Before
   public void setup() {
-    service = new LocacaoService();
-    var dao = Mockito.mock(LocacaoDao.class);
-    service.setLocacaoDao(dao);
+    MockitoAnnotations.openMocks(this);
 
   }
 
