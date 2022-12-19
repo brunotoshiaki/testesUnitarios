@@ -94,9 +94,11 @@ public class LocacaoService {
   }
 
   public void notificarAtrasos() {
-    List<Locacao> locacoes = locacaoDao.obterLocacoesPendentes();
+  var locacoes = locacaoDao.obterLocacoesPendentes();
     for (Locacao locacao : locacoes) {
-      emailService.notificarAtraso(locacao.getUsuario());
+      if (locacao.getDataRetorno().before(new Date())) {
+        emailService.notificarAtraso(locacao.getUsuario());
+      }
     }
   }
 

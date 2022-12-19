@@ -3,10 +3,10 @@ package br.com.bruno.toshiaki.builders;
 
 import static br.com.bruno.toshiaki.builders.FilmeBuilder.umFilme;
 import static br.com.bruno.toshiaki.builders.UsuarioBuilder.umUsuario;
+import static br.com.bruno.toshiaki.utils.DataUtils.obterDataComDiferencaDias;
 
 import br.com.bruno.toshiaki.entidades.Locacao;
 import br.com.bruno.toshiaki.entidades.Usuario;
-import br.com.bruno.toshiaki.utils.DataUtils;
 import java.util.Collections;
 import java.util.Date;
 
@@ -30,7 +30,7 @@ public class LocacaoBuilder {
     elemento.setUsuario(umUsuario().agora());
     elemento.setFilmes(Collections.singletonList(umFilme().agora()));
     elemento.setDataLocacao(new Date());
-    elemento.setDataRetorno(DataUtils.obterDataComDiferencaDias(1));
+    elemento.setDataRetorno(obterDataComDiferencaDias(1));
     elemento.setValor(4.0);
   }
 
@@ -40,13 +40,13 @@ public class LocacaoBuilder {
   }
 
 
-  public LocacaoBuilder comDataRetorno(Date param) {
-    elemento.setDataRetorno(param);
-    return this;
-  }
-
-
   public Locacao agora() {
     return elemento;
+  }
+
+  public LocacaoBuilder atrasada() {
+    elemento.setDataLocacao(obterDataComDiferencaDias(-4));
+    elemento.setDataRetorno(obterDataComDiferencaDias(-2));
+    return this;
   }
 }
