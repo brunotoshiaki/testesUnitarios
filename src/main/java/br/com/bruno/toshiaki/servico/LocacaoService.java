@@ -17,9 +17,12 @@ import org.apache.commons.collections4.CollectionUtils;
 public class LocacaoService {
 
   private LocacaoDao locacaoDao;
+  private SPCService spcService;
+
+  private EmailService emailService;
 
 
-  private static Double getValorFilme(int i, Filme filme) {
+  private Double getValorFilme(int i, Filme filme) {
     return switch (i) {
       case 2 -> filme.getPrecoLocacao() * 0.75;
       case 3 -> filme.getPrecoLocacao() * 0.5;
@@ -27,6 +30,33 @@ public class LocacaoService {
       case 5 -> 0d;
       default -> filme.getPrecoLocacao();
     };
+  }
+
+  private void calculaDataEntrega(Locacao locacao) {
+    //Entrega no dia seguinte
+    var dataEntrega = new Date();
+    dataEntrega = adicionarDias(dataEntrega, 1);
+
+    if (DataUtils.verificarDiaSemana(dataEntrega, Calendar.SUNDAY)) {
+      dataEntrega = adicionarDias(dataEntrega, 1);
+    }
+
+    locacao.setDataRetorno(dataEntrega);
+  }
+
+  public void setSpcService(SPCService spcService) {
+    this.spcService = spcService;
+  }
+
+  private Double getValorTotal(List<Filme> filmes) {
+    var valorTotal = 0d;
+
+    for (int i = 0; i < filmes.size(); i++) {
+      Filme filme = filmes.get(i);
+      var valorFilme = getValorFilme(i, filme);
+      valorTotal += valorFilme;
+    }
+    return valorTotal;
   }
 
   public Locacao alugarFilme(Usuario usuario, List<Filme> filmes)
@@ -45,28 +75,17 @@ public class LocacaoService {
       }
     }
 
+    if (spcService.possuiNegativacao(usuario)) {
+      throw new LocadoraException("Usuario Negativado");
+    }
+
     var locacao = new Locacao();
     locacao.setFilmes(filmes);
     locacao.setUsuario(usuario);
     locacao.setDataLocacao(new Date());
-    var valorTotal = 0d;
+    locacao.setValor(this.getValorTotal(filmes));
 
-    for (int i = 0; i < filmes.size(); i++) {
-      Filme filme = filmes.get(i);
-      var valorFilme = getValorFilme(i, filme);
-      valorTotal += valorFilme;
-    }
-    locacao.setValor(valorTotal);
-
-    //Entrega no dia seguinte
-    var dataEntrega = new Date();
-    dataEntrega = adicionarDias(dataEntrega, 1);
-
-    if (DataUtils.verificarDiaSemana(dataEntrega, Calendar.SUNDAY)) {
-      dataEntrega = adicionarDias(dataEntrega, 1);
-    }
-
-    locacao.setDataRetorno(dataEntrega);
+    calculaDataEntrega(locacao);
 
     //Salvando a locacao...
     locacaoDao.salvar(locacao);
@@ -74,8 +93,20 @@ public class LocacaoService {
     return locacao;
   }
 
+  public void notificarAtrasos() {
+    List<Locacao> locacoes = locacaoDao.obterLocacoesPendentes();
+    for (Locacao locacao : locacoes) {
+      emailService.notificarAtraso(locacao.getUsuario());
+    }
+  }
+
 
   public void setLocacaoDao(LocacaoDao locacaoDao) {
     this.locacaoDao = locacaoDao;
+  }
+
+
+  public void setEmailService(EmailService email) {
+    emailService = email;
   }
 }

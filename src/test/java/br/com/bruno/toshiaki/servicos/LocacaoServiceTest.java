@@ -2,21 +2,28 @@ package br.com.bruno.toshiaki.servicos;
 
 import static br.com.bruno.toshiaki.builders.FilmeBuilder.umFilme;
 import static br.com.bruno.toshiaki.builders.FilmeBuilder.umFilmeSemEstoque;
+import static br.com.bruno.toshiaki.builders.LocacaoBuilder.umLocacao;
 import static br.com.bruno.toshiaki.builders.UsuarioBuilder.umUsuario;
 import static br.com.bruno.toshiaki.matchers.MatchersProprios.caiNumaSegunda;
 import static br.com.bruno.toshiaki.matchers.MatchersProprios.ehHoje;
 import static br.com.bruno.toshiaki.matchers.MatchersProprios.ehHojeComDiferencaDias;
+import static br.com.bruno.toshiaki.utils.DataUtils.obterDataComDiferencaDias;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import br.com.bruno.toshiaki.daos.LocacaoDao;
 import br.com.bruno.toshiaki.exceptions.FilmeSemEstoqueException;
 import br.com.bruno.toshiaki.exceptions.LocadoraException;
+import br.com.bruno.toshiaki.servico.EmailService;
 import br.com.bruno.toshiaki.servico.LocacaoService;
+import br.com.bruno.toshiaki.servico.SPCService;
 import br.com.bruno.toshiaki.utils.DataUtils;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.junit.Assert;
@@ -29,17 +36,31 @@ import org.junit.rules.ExpectedException;
 
 public class LocacaoServiceTest {
 
+
   @Rule
   public ErrorCollector error = new ErrorCollector();
   @Rule
   public ExpectedException exception = ExpectedException.none();
   private LocacaoService service;
 
+  private SPCService spc;
+
+  private LocacaoDao dao;
+
+  private EmailService email;
+
+  public LocacaoServiceTest() {
+  }
+
   @Before
   public void setup() {
     service = new LocacaoService();
-    var dao = mock(LocacaoDao.class);
+    dao = mock(LocacaoDao.class);
     service.setLocacaoDao(dao);
+    spc = mock(SPCService.class);
+    service.setSpcService(spc);
+    email = mock(EmailService.class);
+    service.setEmailService(email);
   }
 
   @Test
@@ -113,5 +134,43 @@ public class LocacaoServiceTest {
 
     assertThat(retorno.getDataRetorno(), caiNumaSegunda());
 
+  }
+
+  @Test
+  public void naoDeveAlugarFilmeParaNegativadoSPC() throws FilmeSemEstoqueException {
+    //cenario
+    var usuario = umUsuario().agora();
+    var filmes = Collections.singletonList(umFilme().agora());
+
+    when(spc.possuiNegativacao(usuario)).thenReturn(true);
+
+    //acao
+    try {
+      service.alugarFilme(usuario, filmes);
+      //verificacao
+      Assert.fail();
+    } catch (LocadoraException e) {
+      Assert.assertThat(e.getMessage(), is("Usuario Negativado"));
+    }
+
+    verify(spc).possuiNegativacao(usuario);
+  }
+
+  @Test
+  public void deveEnviarEmailParaLocacoesAtrasadas() {
+    //cenario
+    var usuario = umUsuario().agora();
+    var locacoes = List.of(
+        umLocacao()
+            .comUsuario(usuario)
+            .comDataRetorno(obterDataComDiferencaDias(-2))
+            .agora());
+    when(dao.obterLocacoesPendentes()).thenReturn(locacoes);
+
+    //acao
+    service.notificarAtrasos();
+
+    //verificacao
+    verify(email).notificarAtraso(usuario);
   }
 }
