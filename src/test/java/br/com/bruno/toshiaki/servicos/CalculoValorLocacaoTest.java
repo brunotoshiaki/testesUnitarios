@@ -5,6 +5,7 @@ import static br.com.bruno.toshiaki.builders.FilmeBuilder.umFilme;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
+import br.com.bruno.toshiaki.daos.LocacaoDao;
 import br.com.bruno.toshiaki.entidades.Filme;
 import br.com.bruno.toshiaki.entidades.Usuario;
 import br.com.bruno.toshiaki.exceptions.FilmeSemEstoqueException;
@@ -18,6 +19,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import org.mockito.Mockito;
 
 @RunWith(Parameterized.class)
 public class CalculoValorLocacaoTest {
@@ -53,6 +55,9 @@ public class CalculoValorLocacaoTest {
   @Before
   public void setup() {
     service = new LocacaoService();
+    var dao = Mockito.mock(LocacaoDao.class);
+    service.setLocacaoDao(dao);
+
   }
 
   @Test

@@ -9,7 +9,9 @@ import static br.com.bruno.toshiaki.matchers.MatchersProprios.ehHojeComDiferenca
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
+import br.com.bruno.toshiaki.daos.LocacaoDao;
 import br.com.bruno.toshiaki.exceptions.FilmeSemEstoqueException;
 import br.com.bruno.toshiaki.exceptions.LocadoraException;
 import br.com.bruno.toshiaki.servico.LocacaoService;
@@ -36,6 +38,8 @@ public class LocacaoServiceTest {
   @Before
   public void setup() {
     service = new LocacaoService();
+    var dao = mock(LocacaoDao.class);
+    service.setLocacaoDao(dao);
   }
 
   @Test

@@ -1,9 +1,8 @@
 package br.com.bruno.toshiaki.builders;
 
 import br.com.bruno.toshiaki.entidades.Usuario;
-import lombok.AllArgsConstructor;
 
-@AllArgsConstructor
+
 public class UsuarioBuilder {
 
   private Usuario usuario;

@@ -2,6 +2,7 @@ package br.com.bruno.toshiaki.servico;
 
 import static br.com.bruno.toshiaki.utils.DataUtils.adicionarDias;
 
+import br.com.bruno.toshiaki.daos.LocacaoDao;
 import br.com.bruno.toshiaki.entidades.Filme;
 import br.com.bruno.toshiaki.entidades.Locacao;
 import br.com.bruno.toshiaki.entidades.Usuario;
@@ -14,6 +15,19 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 
 public class LocacaoService {
+
+  private LocacaoDao locacaoDao;
+
+
+  private static Double getValorFilme(int i, Filme filme) {
+    return switch (i) {
+      case 2 -> filme.getPrecoLocacao() * 0.75;
+      case 3 -> filme.getPrecoLocacao() * 0.5;
+      case 4 -> filme.getPrecoLocacao() * 0.25;
+      case 5 -> 0d;
+      default -> filme.getPrecoLocacao();
+    };
+  }
 
   public Locacao alugarFilme(Usuario usuario, List<Filme> filmes)
       throws FilmeSemEstoqueException, LocadoraException {
@@ -55,20 +69,13 @@ public class LocacaoService {
     locacao.setDataRetorno(dataEntrega);
 
     //Salvando a locacao...
-    //TODO adicionar método para salvar
+    locacaoDao.salvar(locacao);
 
     return locacao;
   }
 
-  private static Double getValorFilme(int i, Filme filme) {
-    return switch (i) {
-      case 2 -> filme.getPrecoLocacao() * 0.75;
-      case 3 -> filme.getPrecoLocacao() * 0.5;
-      case 4 -> filme.getPrecoLocacao() * 0.25;
-      case 5 -> 0d;
-      default -> filme.getPrecoLocacao();
-    };
+
+  public void setLocacaoDao(LocacaoDao locacaoDao) {
+    this.locacaoDao = locacaoDao;
   }
-
-
 }
