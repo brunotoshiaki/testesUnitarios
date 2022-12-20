@@ -140,7 +140,7 @@ public class LocacaoServiceTest {
   }
 
   @Test
-  public void naoDeveAlugarFilmeParaNegativadoSPC() throws FilmeSemEstoqueException {
+  public void naoDeveAlugarFilmeParaNegativadoSPC() throws Exception {
     //cenario
     final var usuario = umUsuario().agora();
     final var filmes = Collections.singletonList(umFilme().agora());
@@ -182,5 +182,17 @@ public class LocacaoServiceTest {
     verify(this.email, atLeastOnce()).notificarAtraso(usuario3);
     verify(this.email, never()).notificarAtraso(usuario2);
     verifyNoMoreInteractions(this.email);
+  }
+
+  @Test
+  public void deveTratarErroSPC() throws Exception {
+    final var usuario = umUsuario().agora();
+    final var filmes = List.of(umFilme().agora());
+
+    when(this.spc.possuiNegativacao(usuario)).thenThrow(new LocadoraException("Problema com SPC, tente novamente"));
+    this.exception.expect(LocadoraException.class);
+    this.exception.expectMessage("Problema com SPC, tente novamente");
+
+    this.service.alugarFilme(usuario, filmes);
   }
 }

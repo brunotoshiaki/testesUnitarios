@@ -22,7 +22,7 @@ public class LocacaoService {
   private EmailService emailService;
 
 
-  private Double getValorFilme(int i, Filme filme) {
+  private Double getValorFilme(final int i, final Filme filme) {
     return switch (i) {
       case 2 -> filme.getPrecoLocacao() * 0.75;
       case 3 -> filme.getPrecoLocacao() * 0.5;
@@ -32,7 +32,7 @@ public class LocacaoService {
     };
   }
 
-  private void calculaDataEntrega(Locacao locacao) {
+  private void calculaDataEntrega(final Locacao locacao) {
     //Entrega no dia seguinte
     var dataEntrega = new Date();
     dataEntrega = adicionarDias(dataEntrega, 1);
@@ -45,18 +45,18 @@ public class LocacaoService {
   }
 
 
-  private Double getValorTotal(List<Filme> filmes) {
+  private Double getValorTotal(final List<Filme> filmes) {
     var valorTotal = 0d;
 
     for (int i = 0; i < filmes.size(); i++) {
-      Filme filme = filmes.get(i);
-      var valorFilme = getValorFilme(i, filme);
+      final Filme filme = filmes.get(i);
+      final var valorFilme = this.getValorFilme(i, filme);
       valorTotal += valorFilme;
     }
     return valorTotal;
   }
 
-  public Locacao alugarFilme(Usuario usuario, List<Filme> filmes)
+  public Locacao alugarFilme(final Usuario usuario, final List<Filme> filmes)
       throws FilmeSemEstoqueException, LocadoraException {
     if (usuario == null) {
       throw new LocadoraException("Usuario vazio");
@@ -66,35 +66,40 @@ public class LocacaoService {
       throw new LocadoraException("Filme vazio");
     }
 
-    for (Filme filme : filmes) {
+    for (final Filme filme : filmes) {
       if (filme.getEstoque() == 0) {
         throw new FilmeSemEstoqueException();
       }
     }
-
-    if (spcService.possuiNegativacao(usuario)) {
+    final boolean negativado;
+    try {
+      negativado = this.spcService.possuiNegativacao(usuario);
+    } catch (final Exception e) {
+      throw new LocadoraException("Problema com SPC, tente novamente");
+    }
+    if (negativado) {
       throw new LocadoraException("Usuario Negativado");
     }
 
-    var locacao = new Locacao();
+    final var locacao = new Locacao();
     locacao.setFilmes(filmes);
     locacao.setUsuario(usuario);
     locacao.setDataLocacao(new Date());
     locacao.setValor(this.getValorTotal(filmes));
 
-    calculaDataEntrega(locacao);
+    this.calculaDataEntrega(locacao);
 
     //Salvando a locacao...
-    locacaoDao.salvar(locacao);
+    this.locacaoDao.salvar(locacao);
 
     return locacao;
   }
 
   public void notificarAtrasos() {
-    var locacoes = locacaoDao.obterLocacoesPendentes();
-    for (Locacao locacao : locacoes) {
+    final var locacoes = this.locacaoDao.obterLocacoesPendentes();
+    for (final Locacao locacao : locacoes) {
       if (locacao.getDataRetorno().before(new Date())) {
-        emailService.notificarAtraso(locacao.getUsuario());
+        this.emailService.notificarAtraso(locacao.getUsuario());
       }
     }
   }
