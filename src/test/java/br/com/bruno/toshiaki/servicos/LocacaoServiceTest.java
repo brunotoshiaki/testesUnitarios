@@ -19,6 +19,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import br.com.bruno.toshiaki.daos.LocacaoDao;
+import br.com.bruno.toshiaki.entidades.Locacao;
 import br.com.bruno.toshiaki.entidades.Usuario;
 import br.com.bruno.toshiaki.exceptions.FilmeSemEstoqueException;
 import br.com.bruno.toshiaki.exceptions.LocadoraException;
@@ -37,6 +38,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import org.junit.rules.ExpectedException;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -194,5 +196,21 @@ public class LocacaoServiceTest {
     this.exception.expectMessage("Problema com SPC, tente novamente");
 
     this.service.alugarFilme(usuario, filmes);
+  }
+
+  @Test
+  public void deveProrrogarLocacao() {
+    final var locao = umLocacao().agora();
+
+    this.service.prorrogarLocacao(locao, 3);
+    final var argCap = ArgumentCaptor.forClass(Locacao.class);
+
+    verify(this.dao).salvar(argCap.capture());
+    var locacaoRetorno = argCap.getValue();
+
+    //o errorCheck valida cada instucao enquanto o assertThat so aceita uma validacao por metodo
+    error.checkThat(locacaoRetorno.getValor(), is(12.0));
+    error.checkThat(locacaoRetorno.getDataLocacao(), ehHoje());
+    error.checkThat(locacaoRetorno.getDataRetorno(), ehHojeComDiferencaDias(3));
   }
 }
