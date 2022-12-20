@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import br.com.bruno.toshiaki.servico.Calculadora;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,8 +16,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
-
+@Slf4j
 public class CalculadoraMockTest {
+
 
   @Mock
   private Calculadora calcMock;
@@ -28,6 +30,7 @@ public class CalculadoraMockTest {
   @Before
   public void setUp() {
     MockitoAnnotations.openMocks(this);
+
   }
 
   @Test
@@ -38,32 +41,33 @@ public class CalculadoraMockTest {
   }
 
   private void mock() {
+
     //mockito coloca o valor padrao como retorno
-    System.out.println("Mockito sem definir retorno: " + this.calcMock.somar(1, 2));
+    log.info("Mockito sem definir retorno: " + this.calcMock.somar(1, 2));
 
     //definindo o retorno
     when(this.calcMock.somar(1, 2)).thenReturn(8);
 
-    System.out.println("Mockito definindo o retorno: " + this.calcMock.somar(1, 2));
+    log.info("Mockito definindo o retorno: " + this.calcMock.somar(1, 2));
 
     //se mudar o parametro ele sempre retornara o valor padrao
 
     when(this.calcMock.somar(1, 5)).thenReturn(8);
-    System.out.println("Mockito mudando o segundo parametro (2 foi substituido por 5): " + this.calcMock.somar(1, 2));
+    log.info("Mockito mudando o segundo parametro (2 foi substituido por 5): " + this.calcMock.somar(1, 2));
   }
 
   /**
    * O SPY sempre retorna a execucao do metodo
    */
   private void spy() {
-    System.out.println("--- SPY ---");
-    System.out.println("SPY sem definir retorno: " + this.calcSpy.somar(1, 2));
+
+    log.debug("SPY sem definir retorno: " + this.calcSpy.somar(1, 2));
 
     when(this.calcSpy.somar(1, 2)).thenReturn(8);
-    System.out.println("SPY com retorno: " + this.calcSpy.somar(1, 2));
+    log.info("SPY com retorno: " + this.calcSpy.somar(1, 2));
 
     when(this.calcSpy.somar(1, 5)).thenReturn(8);
-    System.out.println("SPY mudando o segundo parametro (2 foi substituido por 5): " + this.calcSpy.somar(1, 2));
+    log.info("SPY mudando o segundo parametro (2 foi substituido por 5): " + this.calcSpy.somar(1, 2));
   }
 
 
@@ -71,8 +75,8 @@ public class CalculadoraMockTest {
   public void mockDeveChamarMetodoReal() {
     when(this.calcMock.somar(1, 2)).thenCallRealMethod();
     when(this.calcSpy.somar(1, 2)).thenReturn(8);
-    System.out.println("Mock: " + this.calcMock.somar(1, 2));
-    System.out.println("SPY: " + this.calcSpy.somar(1, 2));
+    log.debug("Mock: " + this.calcMock.somar(1, 2));
+    log.debug("SPY: " + this.calcSpy.somar(1, 2));
     assertTrue(true);
 
   }
@@ -86,14 +90,14 @@ public class CalculadoraMockTest {
     when(calc.somar(argCapt.capture(), argCapt.capture())).thenReturn(5);
 
     Assert.assertEquals(5, calc.somar(134345, -234));
-    System.out.println(argCapt.getAllValues());
+    log.debug(argCapt.getAllValues().toString());
   }
 
   @Test
   public void comportamentoComMetodosVoid() {
-    System.out.println("Mock: ");
+    log.debug("Mock: ");
     this.calcMock.imprime();
-    System.out.println("Spy: ");
+    log.debug("Spy: ");
     this.calcSpy.imprime();
     assertTrue(true);
   }
@@ -101,9 +105,9 @@ public class CalculadoraMockTest {
   @Test
   public void testandoMetodosVoids() {
     doNothing().when(this.calcSpy).imprime();
-    System.out.println("Mock: ");
+    log.debug("Mock: ");
     this.calcMock.imprime();
-    System.out.println("Spy: ");
+    log.debug("Spy: ");
     this.calcSpy.imprime();
     assertTrue(true);
   }
@@ -113,8 +117,8 @@ public class CalculadoraMockTest {
     when(this.calcMock.somar(1, 2)).thenReturn(5);
     //nao fez a chamada
     when(this.calcSpy.somar(1, 2)).thenReturn(5);
-    System.out.println("Mock: " + this.calcMock.somar(1, 2));
-    System.out.println("SPY: " + this.calcSpy.somar(1, 2));
+    log.debug("Mock: " + this.calcMock.somar(1, 2));
+    log.debug("SPY: " + this.calcSpy.somar(1, 2));
     assertTrue(true);
 
   }
@@ -123,8 +127,8 @@ public class CalculadoraMockTest {
   public void testandoComportamentoComDoReturn() {
     when(this.calcMock.somar(1, 2)).thenReturn(5);
     doReturn(5).when(calcSpy).somar(1, 2);
-    System.out.println("Mock: " + this.calcMock.somar(1, 2));
-    System.out.println("SPY: " + this.calcSpy.somar(1, 2));
+    log.debug("Mock: " + this.calcMock.somar(1, 2));
+    log.debug("SPY: " + this.calcSpy.somar(1, 2));
     assertTrue(true);
   }
 }

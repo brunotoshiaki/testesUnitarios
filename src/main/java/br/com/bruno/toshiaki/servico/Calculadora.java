@@ -10,7 +10,7 @@ public class Calculadora {
   }
 
   public int somar(int a, int b) {
-    System.out.println("Passei aqui");
+    System.out.println("Passei no somar");
     return a + b;
   }
 
@@ -30,7 +30,7 @@ public class Calculadora {
   }
 
   public void imprime() {
-    System.out.println("Passei aqui");
+    System.out.println("imprimindo");
   }
 
 }

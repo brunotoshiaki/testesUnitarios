@@ -13,12 +13,30 @@
     <maven.compiler.target>19</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <parallel>all</parallel>
+          <useUnlimitedThreads>true</useUnlimitedThreads>
+        </configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <version>3.0.0-M7</version>
+      </plugin>
+    </plugins>
+  </build>
   <dependencies>
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <version>1.18.24</version>
-      <scope>compile</scope>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <artifactId>logback-classic</artifactId>
+      <groupId>ch.qos.logback</groupId>
+      <version>1.4.5</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -37,5 +55,6 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
 
 </project>
