@@ -21,6 +21,9 @@ public class LocacaoService {
 
   private EmailService emailService;
 
+  public Date getDataLocacao() {
+    return new Date();
+  }
 
   private Double getValorFilme(final int i, final Filme filme) {
     return switch (i) {
@@ -34,7 +37,7 @@ public class LocacaoService {
 
   private void calculaDataEntrega(final Locacao locacao) {
     //Entrega no dia seguinte
-    var dataEntrega = new Date();
+    var dataEntrega = getDataLocacao();
     dataEntrega = adicionarDias(dataEntrega, 1);
 
     if (DataUtils.verificarDiaSemana(dataEntrega, Calendar.SUNDAY)) {
@@ -43,7 +46,6 @@ public class LocacaoService {
 
     locacao.setDataRetorno(dataEntrega);
   }
-
 
   private Double getValorTotal(final List<Filme> filmes) {
     var valorTotal = 0d;
@@ -84,7 +86,7 @@ public class LocacaoService {
     final var locacao = new Locacao();
     locacao.setFilmes(filmes);
     locacao.setUsuario(usuario);
-    locacao.setDataLocacao(new Date());
+    locacao.setDataLocacao(getDataLocacao());
     locacao.setValor(this.getValorTotal(filmes));
 
     this.calculaDataEntrega(locacao);
@@ -98,7 +100,7 @@ public class LocacaoService {
   public void notificarAtrasos() {
     final var locacoes = this.locacaoDao.obterLocacoesPendentes();
     for (final Locacao locacao : locacoes) {
-      if (locacao.getDataRetorno().before(new Date())) {
+      if (locacao.getDataRetorno().before(getDataLocacao())) {
         this.emailService.notificarAtraso(locacao.getUsuario());
       }
     }
@@ -108,7 +110,7 @@ public class LocacaoService {
     var novaLocacao = new Locacao();
     novaLocacao.setUsuario(locacao.getUsuario());
     novaLocacao.setFilmes(locacao.getFilmes());
-    novaLocacao.setDataLocacao(new Date());
+    novaLocacao.setDataLocacao(getDataLocacao());
     novaLocacao.setDataRetorno(DataUtils.obterDataComDiferencaDias(dias));
     novaLocacao.setValor(locacao.getValor() * dias);
     locacaoDao.salvar(novaLocacao);

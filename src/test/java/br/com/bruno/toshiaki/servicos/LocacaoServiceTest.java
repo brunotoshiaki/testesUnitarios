@@ -7,11 +7,14 @@ import static br.com.bruno.toshiaki.builders.UsuarioBuilder.umUsuario;
 import static br.com.bruno.toshiaki.matchers.MatchersProprios.caiNumaSegunda;
 import static br.com.bruno.toshiaki.matchers.MatchersProprios.ehHoje;
 import static br.com.bruno.toshiaki.matchers.MatchersProprios.ehHojeComDiferencaDias;
+import static br.com.bruno.toshiaki.utils.DataUtils.isMesmaData;
+import static br.com.bruno.toshiaki.utils.DataUtils.obterData;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -26,13 +29,9 @@ import br.com.bruno.toshiaki.exceptions.LocadoraException;
 import br.com.bruno.toshiaki.servico.EmailService;
 import br.com.bruno.toshiaki.servico.LocacaoService;
 import br.com.bruno.toshiaki.servico.SPCService;
-import br.com.bruno.toshiaki.utils.DataUtils;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,6 +41,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 public class LocacaoServiceTest {
 
@@ -52,6 +52,7 @@ public class LocacaoServiceTest {
   public ExpectedException exception = ExpectedException.none();
 
   @InjectMocks
+  @Spy
   private LocacaoService service;
   @Mock
   private SPCService spc;
@@ -70,19 +71,20 @@ public class LocacaoServiceTest {
 
   @Test
   public void deveAlugarFilme() throws Exception {
-    Assume.assumeFalse(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
 
     //cenario
     final var usuario = umUsuario().agora();
     final var filmes = List.of(umFilme().comValor(5.0).agora());
 
+    doReturn(obterData(28, 4, 2017)).when(this.service).getDataLocacao();
     //acao
     final var locacao = this.service.alugarFilme(usuario, filmes);
 
     //verificacao
     this.error.checkThat(locacao.getValor(), is(equalTo(5.0)));
-    this.error.checkThat(locacao.getDataLocacao(), ehHoje());
-    this.error.checkThat(locacao.getDataRetorno(), ehHojeComDiferencaDias(1));
+    this.error.checkThat(isMesmaData(locacao.getDataLocacao(), obterData(28, 4, 2017)), is(true));
+    this.error.checkThat(isMesmaData(locacao.getDataRetorno(), obterData(29, 4, 2017)), is(true));
+
   }
 
   @Test(expected = FilmeSemEstoqueException.class)
@@ -123,14 +125,12 @@ public class LocacaoServiceTest {
 
 
   @Test
-  public void deveDevolverSegundaAlugandoSabado()
-      throws FilmeSemEstoqueException, LocadoraException {
-
-    Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
+  public void deveDevolverSegundaAlugandoSabado() throws FilmeSemEstoqueException, LocadoraException {
 
     //cenario
     final var usuario = umUsuario().agora();
     final var filmes = List.of(umFilme().agora());
+    doReturn(obterData(29, 4, 2017)).when(this.service).getDataLocacao();
 
     //acao
     final var retorno = this.service.alugarFilme(usuario, filmes);
@@ -206,11 +206,11 @@ public class LocacaoServiceTest {
     final var argCap = ArgumentCaptor.forClass(Locacao.class);
 
     verify(this.dao).salvar(argCap.capture());
-    var locacaoRetorno = argCap.getValue();
+    final var locacaoRetorno = argCap.getValue();
 
     //o errorCheck valida cada instucao enquanto o assertThat so aceita uma validacao por metodo
-    error.checkThat(locacaoRetorno.getValor(), is(12.0));
-    error.checkThat(locacaoRetorno.getDataLocacao(), ehHoje());
-    error.checkThat(locacaoRetorno.getDataRetorno(), ehHojeComDiferencaDias(3));
+    this.error.checkThat(locacaoRetorno.getValor(), is(12.0));
+    this.error.checkThat(locacaoRetorno.getDataLocacao(), ehHoje());
+    this.error.checkThat(locacaoRetorno.getDataRetorno(), ehHojeComDiferencaDias(3));
   }
 }
