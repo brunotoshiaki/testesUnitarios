@@ -1,5 +1,8 @@
 package br.com.bruno.toshiaki.servicos;
 
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import br.com.bruno.toshiaki.servico.Calculadora;
@@ -31,7 +34,7 @@ public class CalculadoraMockTest {
   public void deveMostrarDiferencaEntreMockSpy() {
     this.mock();
     this.spy();
-    Assert.assertTrue(true);
+    assertTrue(true);
   }
 
   private void mock() {
@@ -57,10 +60,21 @@ public class CalculadoraMockTest {
     System.out.println("SPY sem definir retorno: " + this.calcSpy.somar(1, 2));
 
     when(this.calcSpy.somar(1, 2)).thenReturn(8);
-    System.out.println("SPY com retorno: " + calcSpy.somar(1, 2));
+    System.out.println("SPY com retorno: " + this.calcSpy.somar(1, 2));
 
     when(this.calcSpy.somar(1, 5)).thenReturn(8);
     System.out.println("SPY mudando o segundo parametro (2 foi substituido por 5): " + this.calcSpy.somar(1, 2));
+  }
+
+
+  @Test
+  public void mockDeveChamarMetodoReal() {
+    when(this.calcMock.somar(1, 2)).thenCallRealMethod();
+    when(this.calcSpy.somar(1, 2)).thenReturn(8);
+    System.out.println("Mock: " + this.calcMock.somar(1, 2));
+    System.out.println("SPY: " + this.calcSpy.somar(1, 2));
+    assertTrue(true);
+
   }
 
   @Test
@@ -73,5 +87,44 @@ public class CalculadoraMockTest {
 
     Assert.assertEquals(5, calc.somar(134345, -234));
     System.out.println(argCapt.getAllValues());
+  }
+
+  @Test
+  public void comportamentoComMetodosVoid() {
+    System.out.println("Mock: ");
+    this.calcMock.imprime();
+    System.out.println("Spy: ");
+    this.calcSpy.imprime();
+    assertTrue(true);
+  }
+
+  @Test
+  public void testandoMetodosVoids() {
+    doNothing().when(this.calcSpy).imprime();
+    System.out.println("Mock: ");
+    this.calcMock.imprime();
+    System.out.println("Spy: ");
+    this.calcSpy.imprime();
+    assertTrue(true);
+  }
+
+  @Test
+  public void testandoComportamentoNormal() {
+    when(this.calcMock.somar(1, 2)).thenReturn(5);
+    //nao fez a chamada
+    when(this.calcSpy.somar(1, 2)).thenReturn(5);
+    System.out.println("Mock: " + this.calcMock.somar(1, 2));
+    System.out.println("SPY: " + this.calcSpy.somar(1, 2));
+    assertTrue(true);
+
+  }
+
+  @Test
+  public void testandoComportamentoComDoReturn() {
+    when(this.calcMock.somar(1, 2)).thenReturn(5);
+    doReturn(5).when(calcSpy).somar(1, 2);
+    System.out.println("Mock: " + this.calcMock.somar(1, 2));
+    System.out.println("SPY: " + this.calcSpy.somar(1, 2));
+    assertTrue(true);
   }
 }
